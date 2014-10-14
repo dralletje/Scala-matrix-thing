@@ -1,10 +1,10 @@
-const si_ze = 5000
-const t = Int # Change to Uint16 later.. maybe
+const si_ze = 7000
+const t = Uint8 # Change to Uint16 later.. maybe
 const v = Array{Float64, 1}
 const m = Array{t, 2}
 
 function things()
-  const matrix = [randbool() ? 1 : 0 for x=1:si_ze, y=1:si_ze]::m
+  const matrix = [randbool() ? 0x1 : 0x0 for x=1:si_ze, y=1:si_ze]::m
   vector = [1.0 for x=1:si_ze]::v
 
   oldvector = Array(Float64, 1)
@@ -15,7 +15,7 @@ function things()
     count += 1
 
     if lookslike(vector, oldvector)
-      #println(count)
+      println(count)
       return map(x -> round(x, 2), vector)
     end
   end
@@ -47,5 +47,6 @@ function keer(matrix::m, vector::v)
   [keer(matrix, i, vector) for i=1:size(matrix, 1)]
 end
 
-@time value = [things() for i=1:5]
+@time things()
+#@time value = [things() for i=1:5]
 #println(value)

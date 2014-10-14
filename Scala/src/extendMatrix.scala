@@ -38,6 +38,11 @@ class BetterStream[A](stream: Stream[A]) {
   def specialFold[B](start: B)(op: (B, A) => B): SpecialFolder[B, A] = {
     new SpecialFolder(stream, start, op)
   }
+
+  def circular: Stream[A] = {
+    lazy val circle: Stream[A] = stream #::: circle
+    circle
+  }
 }
 
 class BetterVector(vector: V) {
@@ -60,6 +65,6 @@ class BetterVector(vector: V) {
 
 class BetterMatrix(matrix: Matrix) {
   def *(vector: V) = {
-    matrix map { _ zip vector map { case (x, y) => x*y }} map (_.sum)
+    matrix.par.map({ _ zip vector map { case (x, y) => x*y }}).map(_.sum).seq
   }
 }

@@ -6,18 +6,26 @@ import scala.util.Random
 object app {
   def main(args: Array[String]): Unit = {
     println("Starting.. ^^")
-    changeInBetween()
+    timeTest()
   }
 
-  def randomStart() = {
-    val matrix = randomMatrix(1000)
+  def timeTest() {
+    val matrix = randomMatrix(3000)
+    val base = Vector.fill(matrix.size)(1.0)
+    time {
+      **(Stream(matrix).circular, base)
+    }
+  }
+
+  def randomStart() {
+    val matrix = randomMatrix(3000)
     val (vector1, itt1) = time {
       val base = Vector.fill(matrix.size)(1.0)
-      **(Stream.continually(matrix), base)
+      **(Stream(matrix).circular, base)
     }
     val (vector2, itt2) = time {
       val base = Vector.fill(matrix.size)(Random.nextDouble)
-      **(Stream.continually(matrix), base)
+      **(Stream(matrix).circular, base)
     }
 
     println("Are they the same? "+(if (vector1 ~ vector2) "yes! :-D" else "no :-("))
@@ -25,7 +33,7 @@ object app {
   }
 
 
-  def changeInBetween() = {
+  def changeInBetween() {
     val matrix = betterRandomMatrix(1000)
     val stream = Stream.continually(matrix)
 

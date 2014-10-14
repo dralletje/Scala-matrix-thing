@@ -1,13 +1,13 @@
-const si_ze = 7000
+const si_ze = 10000
 const t = Uint8 # Change to Uint16 later.. maybe
-const v = Array{Float64, 1}
+const v = Array{Float32, 1}
 const m = Array{t, 2}
 
 function things()
   const matrix = [randbool() ? 0x1 : 0x0 for x=1:si_ze, y=1:si_ze]::m
-  vector = [1.0 for x=1:si_ze]::v
+  vector = [1.0f0 for x=1:si_ze]::v
 
-  oldvector = Array(Float64, 1)
+  oldvector = Array(Float32, 1)
   count = 0
   while true
     oldvector = vector

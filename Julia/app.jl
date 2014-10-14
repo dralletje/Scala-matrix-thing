@@ -40,7 +40,7 @@ function normalize(vector::v)
 end
 
 function keer(matrix::m, row::Integer, vector::v)
-  sum([matrix[row, i]*vector[i] for i=1:size(matrix, 2)])
+  sum([matrix[i, row]*vector[i] for i=1:size(matrix, 2)])
 end
 
 function keer(matrix::m, vector::v)

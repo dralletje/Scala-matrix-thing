@@ -1,11 +1,21 @@
-const si_ze = 20000
-const t = Uint8 # Change to Uint16 later.. maybe
+const si_ze = 10000
+const t = UInt8 # Change to Uint16 later.. maybe
 const v = Array{Float32, 1}
 const m = Array{t, 2}
 
-@time const matrix = [randbool() ? 0x1 : 0x0 for x=1:si_ze, y=1:si_ze]::m
+@time const matrix = [rand(Bool) ? 0x1 : 0x0 for x=1:si_ze, y=1:si_ze]::m
 
-import functions.jl
+function make_small(matrix::m)
+  const s = ceil(size(matrix, 1) / 8)
+  function reducetonum(x, y, m)
+    for i=1:8
+      matrix
+    end
+  end
+  const satrix = [reducetonum(x, y, matrix) for x=1:s, y=1:s]
+end
+
+include("Functions.jl")
 
 
 function things(matrix::m)

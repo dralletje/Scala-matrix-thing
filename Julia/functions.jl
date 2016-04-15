@@ -2,7 +2,6 @@
 #
 # Functions :-D
 #
-
 function lookslike(vec1::v, vec2::v)
   if length(vec1) !== length(vec2)
     return false

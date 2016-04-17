@@ -1,8 +1,23 @@
 const v = Array{Float32, 1}
 const m = Array{UInt8, 2}
 
-include("Functions.jl")
-include("generate.jl")
+include("Fn.jl")
+include("Generate.jl")
+include("Digitalize.jl")
+
+builder = Digitalize.create()
+Digitalize.addIndex(builder, "leraar", ["A", "B", "C"])
+Digitalize.addIndex(builder, "uur", [
+  "1:1", "1:2", "1:3",
+  "2:1", "2:2", "2:3",
+  "3:1", "3:2", "3:3",
+])
+Digitalize.addIndex(builder, "leerling", [string(i) for i in 1:20])
+
+
+Digitalize.build_entries(builder)
+
+exit()
 
 # This will generate a random matrix (compressed) with a specified size
 #const matrix = Generate.matrix(2048)::m

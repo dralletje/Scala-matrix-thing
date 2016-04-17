@@ -5,15 +5,13 @@
 module Fn
 
 const v = Array{Float32, 1}
-#const m = BitArray{2}
 const m = Array{UInt8, 2}
 
-export normalize!, keer!, looklike!
+export normalize!, multiply!, looklike!
 
-const NULL = 0x00
-
-const bits = [0x02 ^ x for x = 0:7]
-
+## Compare two vectors with their values rounded
+# Because I want to stop iterating when the vectors
+# are pretty close, so I 'know' we are close as well
 function lookslike(vec1::v, vec2::v, digits)
   if length(vec1) !== length(vec2)
     return false
@@ -27,6 +25,8 @@ function lookslike(vec1::v, vec2::v, digits)
   return true
 end
 
+# Normalize a vector: Get all their values between 0 and 1, yet preserving
+# their relative sizes
 function normalize!(vector::v)
   m, i = findmax(vector)
   for k in 1:length(vector)
@@ -35,19 +35,27 @@ function normalize!(vector::v)
   return vector
 end
 
-function compressed_keer!(matrix::m, vector::v, newvector::v)
+# The real thing: Will apply the vector to the compressed matrix,
+# accumulating the result in a new vector.
+# This loop is the only thing really taking time in this program,
+# minor performance fixes will result in hugely faster runs.
+function compressed_multiply!(matrix::m, vector::v, newvector::v)
+  # Loop over every field in the matrix
   @inbounds for column in 1:size(matrix, 2)
     for row in 1:size(matrix, 1)
+      # Take the number from the matrix
       num = matrix[row, column]
-
+      # Now loop over the bits, as every UInt8 contains 8 actual columns
       for bit in 1:8
+        # Put the result in new vector
         newvector[row] += ((num >>> bit) & 0x1)*vector[column + bit - 1]
       end
     end
   end
 end
 
-function uncompressed_keer!(matrix::m, vector::v, newvector::v)
+# Only used to compare performance, this one
+function uncompressed_multiply!(matrix::m, vector::v, newvector::v)
   for column in 1:size(matrix, 2)
     for row in 1:size(matrix, 1)
       @inbounds newvector[row] += matrix[row, column]*vector[column]
@@ -55,21 +63,24 @@ function uncompressed_keer!(matrix::m, vector::v, newvector::v)
   end
 end
 
-# Mutationing
-function keer!(matrix::m, vector::v, newvector::v)
+# Will call `compressed_multiply` and `uncompressed_multiply` depending on the
+# matrix it gets in.
+function multiply!(matrix::m, vector::v, newvector::v)
+  # Determine whether or not the matrix is compressed
   is_compressed = size(matrix, 2) != size(matrix, 1)
 
-  for i in 1:size(matrix, 1)
-    newvector[i] = 0.0
-  end
+  # Intialize the new vector with zeros
+  fill!(newvector, 0.0)
 
+  # Call the function you need to call!
   if is_compressed
-    compressed_keer!(matrix, vector, newvector)
+    compressed_multiply!(matrix, vector, newvector)
   else
-    uncompressed_keer!(matrix, vector, newvector)
+    uncompressed_multiply!(matrix, vector, newvector)
   end
 
-  return (newvector, vector) # Newvector becomes vector, and vector bcomes space for newvector
+  # Newvector becomes vector, and vector bcomes space for newvector
+  return (newvector, vector)
 end
 
 end

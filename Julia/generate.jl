@@ -3,6 +3,7 @@ module Generate
 export matrix, compress
 
 const possibits = [0x02 ^ x for x = 0:7]
+const COMPRESS = true
 
 function random_uint8(uint8)
   return rand(Bool) ? uint8 : 0x0
@@ -17,20 +18,26 @@ function generate_byte()
 end
 
 function matrix(si_ze)
-  [generate_byte() for x=1:si_ze, y=1:si_ze/8]
+  if COMPRESS
+    [generate_byte() for x=1:si_ze, y=1:si_ze/8]
+  else
+    [rand(Bool) ? 0x1 : 0x0 for x=1:si_ze, y=1:si_ze]
+  end
 end
 
 function compress(vector::Array{Bool, 1})
   x = 0x00
   for i=1:size(possibits, 1)
-    #print(bits(x), "\n")
-    #print(bits(possibits[i]), " - ", vector[i], "\n\n")
     x = x | (vector[i] * possibits[i])
   end
   return x
 end
 
 function compress(matrix::Array{Bool, 2})
+  if !COMPRESS
+    return [x ? 0x1 : 0x0 for x = matrix]
+  end
+
   if size(matrix, 1) % 8 != 0
     return []
   end

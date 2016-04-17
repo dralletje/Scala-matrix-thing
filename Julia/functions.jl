@@ -14,13 +14,13 @@ const NULL = 0x00
 
 const bits = [0x02 ^ x for x = 0:7]
 
-function lookslike(vec1::v, vec2::v)
+function lookslike(vec1::v, vec2::v, digits)
   if length(vec1) !== length(vec2)
     return false
   end
 
   for i = 1:length(vec1)
-    if !is(round(vec1[i], 2), round(vec2[i], 2))
+    if !is(round(vec1[i], digits), round(vec2[i], digits))
       return false
     end
   end
@@ -35,19 +35,42 @@ function normalize!(vector::v)
   return vector
 end
 
-# Mutationing
-function keer!(matrix::m, vector::v, newvector::v)
-  for i=1:size(matrix, 1)
-    newvector[i] = 0.0
-    for k=1:size(matrix, 2)
-      num = matrix[i, k]
+function compressed_keer!(matrix::m, vector::v, newvector::v)
+  for column = 1:size(matrix, 2)
+    for row = 1:size(matrix, 1)
+      num = matrix[row, column]
 
-      for bit=1:size(bits, 1)
-        if (num & bits[bit]) > NULL
-          newvector[i] += vector[(k-1) + bit]
-        end
+      for bit = 1:8
+        x = (num & 0x1)
+        newvector[row] += x*vector[column + bit - 1]
+        num = num >>> 1
       end
     end
+  end
+end
+
+function uncompressed_keer!(matrix::m, vector::v, newvector::v)
+  for column = 1:size(matrix, 2)
+    for row = 1:size(matrix, 1)
+      newvector[row] += matrix[row, column]*vector[column]
+    end
+  end
+end
+
+# Mutationing
+function keer!(matrix::m, vector::v, newvector::v)
+  x_size = size(matrix, 1)
+  y_size = size(matrix, 2)
+  is_compressed = y_size != x_size
+
+  for i=1:x_size
+    newvector[i] = 0.0
+  end
+
+  if is_compressed
+    compressed_keer!(matrix, vector, newvector)
+  else
+    uncompressed_keer!(matrix, vector, newvector)
   end
 
   return (newvector, vector) # Newvector becomes vector, and vector bcomes space for newvector

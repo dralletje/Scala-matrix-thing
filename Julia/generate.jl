@@ -11,7 +11,7 @@ end
 
 function generate_byte()
   x = 0x00
-  for i=1:size(possibits, 1)
+  for i in 1:length(possibits)
     x = x | random_uint8(possibits[i])
   end
   return x
@@ -19,15 +19,15 @@ end
 
 function matrix(si_ze)
   if COMPRESS
-    [generate_byte() for x=1:si_ze, y=1:si_ze/8]
+    [generate_byte() for x in 1:si_ze, y in 1:si_ze/8]
   else
-    [rand(Bool) ? 0x1 : 0x0 for x=1:si_ze, y=1:si_ze]
+    [rand(Bool) ? 0x1 : 0x0 for x in 1:si_ze, y in 1:si_ze]
   end
 end
 
-function compress(vector::Array{Bool, 1})
+function compress_vector(vector)
   x = 0x00
-  for i=1:size(possibits, 1)
+  for i in 1:size(possibits, 1)
     x = x | (vector[i] * possibits[i])
   end
   return x
@@ -42,7 +42,10 @@ function compress(matrix::Array{Bool, 2})
     return []
   end
 
-  [compress(vec(matrix[i, (k*8)+1:(k+1)*8])) for i = 1:size(matrix, 1), k = 0:div(size(matrix, 2), 8)-1]
+  [ compress_vector(matrix[row, (column*8)+1:(column+1)*8])
+    for row in 1:size(matrix, 1),
+        column in 0:div(size(matrix, 2), 8)-1
+  ]
 end
 
 end

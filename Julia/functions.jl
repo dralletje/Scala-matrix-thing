@@ -4,9 +4,9 @@
 #
 module Fn
 
-const t = UInt8 # Change to Uint16 later.. maybe
 const v = Array{Float32, 1}
-const m = Array{t, 2}
+#const m = BitArray{2}
+const m = Array{UInt8, 2}
 
 export normalize!, keer!, looklike!
 
@@ -19,7 +19,7 @@ function lookslike(vec1::v, vec2::v, digits)
     return false
   end
 
-  for i = 1:length(vec1)
+  for i in 1:length(vec1)
     if !is(round(vec1[i], digits), round(vec2[i], digits))
       return false
     end
@@ -29,41 +29,37 @@ end
 
 function normalize!(vector::v)
   m, i = findmax(vector)
-  for k=1:length(vector)
-    vector[k] = vector[k] / m
+  for k in 1:length(vector)
+    @inbounds vector[k] = vector[k] / m
   end
   return vector
 end
 
 function compressed_keer!(matrix::m, vector::v, newvector::v)
-  for column = 1:size(matrix, 2)
-    for row = 1:size(matrix, 1)
+  @inbounds for column in 1:size(matrix, 2)
+    for row in 1:size(matrix, 1)
       num = matrix[row, column]
 
-      for bit = 1:8
-        x = (num & 0x1)
-        newvector[row] += x*vector[column + bit - 1]
-        num = num >>> 1
+      for bit in 1:8
+        newvector[row] += ((num >>> bit) & 0x1)*vector[column + bit - 1]
       end
     end
   end
 end
 
 function uncompressed_keer!(matrix::m, vector::v, newvector::v)
-  for column = 1:size(matrix, 2)
-    for row = 1:size(matrix, 1)
-      newvector[row] += matrix[row, column]*vector[column]
+  for column in 1:size(matrix, 2)
+    for row in 1:size(matrix, 1)
+      @inbounds newvector[row] += matrix[row, column]*vector[column]
     end
   end
 end
 
 # Mutationing
 function keer!(matrix::m, vector::v, newvector::v)
-  x_size = size(matrix, 1)
-  y_size = size(matrix, 2)
-  is_compressed = y_size != x_size
+  is_compressed = size(matrix, 2) != size(matrix, 1)
 
-  for i=1:x_size
+  for i in 1:size(matrix, 1)
     newvector[i] = 0.0
   end
 

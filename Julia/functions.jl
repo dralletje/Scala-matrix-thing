@@ -2,6 +2,18 @@
 #
 # Functions :-D
 #
+module Fn
+
+const t = UInt8 # Change to Uint16 later.. maybe
+const v = Array{Float32, 1}
+const m = Array{t, 2}
+
+export normalize!, keer!, looklike!
+
+const NULL = 0x00
+
+const bits = [0x02 ^ x for x = 0:7]
+
 function lookslike(vec1::v, vec2::v)
   if length(vec1) !== length(vec2)
     return false
@@ -28,8 +40,17 @@ function keer!(matrix::m, vector::v, newvector::v)
   for i=1:size(matrix, 1)
     newvector[i] = 0.0
     for k=1:size(matrix, 2)
-      newvector[i] += matrix[k, i]*vector[k]
+      num = matrix[i, k]
+
+      for bit=1:size(bits, 1)
+        if (num & bits[bit]) > NULL
+          newvector[i] += vector[(k-1) + bit]
+        end
+      end
     end
   end
+
   return (newvector, vector) # Newvector becomes vector, and vector bcomes space for newvector
+end
+
 end

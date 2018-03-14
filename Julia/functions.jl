@@ -18,7 +18,7 @@ function lookslike(vec1::v, vec2::v, digits)
   end
 
   for i in 1:length(vec1)
-    if !is(round(vec1[i], digits), round(vec2[i], digits))
+    if round(vec1[i], digits) !== round(vec2[i], digits)
       return false
     end
   end
